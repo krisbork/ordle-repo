@@ -10510,7 +10510,11 @@ const offsetFromDate = new Date(2022, 1, 1);
 const msOffset = Date.now() - offsetFromDate;
 const dayOffset = msOffset / 1000 / 60 / 60 / 24;
 const targetWord = targetWords[Math.floor(dayOffset)];
+const targetDay = Math.floor(dayOffset);
+const gameState = [];
+let loadGameState = [];
 
+initGameState();
 startInteraction();
 
 function startInteraction() {
@@ -10555,6 +10559,21 @@ function handleKeyPress(e) {
         pressKey(e.key);
         return;
     }
+}
+
+function initGameState() {
+    let day = window.localStorage.getItem("day");
+    if (day != targetDay) return;
+
+    loadGameState = JSON.parse(window.localStorage.getItem("gamestate"));
+    if (loadGameState == null) return;
+    loadGameState.forEach((x, i) => {
+        if (x.letter == null) return;
+        const nextTile = guessGrid.querySelector(":not([data-letter])");
+        nextTile.dataset.letter = x.letter.toLowerCase();
+        nextTile.textContent = x.letter;
+        nextTile.dataset.state = x.state;
+    });
 }
 
 function pressKey(key) {
@@ -10625,6 +10644,7 @@ function flipTile(tile, index, array, guess) {
                     () => {
                         startInteraction();
                         checkWinLose(guess, array);
+                        setGameState();
                     },
                     { once: true }
                 );
@@ -10636,6 +10656,22 @@ function flipTile(tile, index, array, guess) {
 
 function getActiveTiles() {
     return guessGrid.querySelectorAll('[data-state="active"]');
+}
+
+function getAllTiles() {
+    return guessGrid.querySelectorAll(':not([data-state="active"])');
+}
+
+function setGameState() {
+    activeTiles = getAllTiles();
+
+    for (var i = 0; i < activeTiles.length; i++) {
+        gameState.push(activeTiles[i].dataset);
+    }
+
+    window.localStorage.setItem("gamestate", JSON.stringify(gameState));
+    window.localStorage.setItem("day", targetDay);
+    console.log(gameState);
 }
 
 function showAlert(message, duration = 1000) {
