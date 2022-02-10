@@ -13,7 +13,7 @@ body {
 
     margin: 0;
     padding: 1em;
-    font-size: clamp(1rem, 4vmin, 1.5rem);
+    font-size: clamp(0.8rem, 4vmin, 1rem);
 }
 
 .keyboard {
