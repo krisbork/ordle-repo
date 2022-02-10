@@ -10512,6 +10512,7 @@ const dayOffset = msOffset / 1000 / 60 / 60 / 24;
 const targetWord = targetWords[Math.floor(dayOffset)];
 const targetDay = Math.floor(dayOffset);
 const gameState = [];
+let targetWordCopy = targetWord;
 let loadGameState = [];
 
 initGameState();
@@ -10606,6 +10607,8 @@ function submitGuess() {
         return word + tile.dataset.letter;
     }, "");
 
+    targetWordCopy = targetWord;
+
     if (!dictionary.includes(guess)) {
         showAlert("Ikke i ordbogen");
         shakeTiles(activeTiles);
@@ -10613,12 +10616,14 @@ function submitGuess() {
     }
 
     stopInteraction();
+
     activeTiles.forEach((...params) => flipTile(...params, guess));
 }
 
 function flipTile(tile, index, array, guess) {
     const letter = tile.dataset.letter;
     const key = keyboard.querySelector(`[data-key="${letter}"i]`);
+
     setTimeout(() => {
         tile.classList.add("flip");
     }, (index * FLIP_ANIMATION_DURATION) / 2);
@@ -10630,9 +10635,10 @@ function flipTile(tile, index, array, guess) {
             if (targetWord[index] === letter) {
                 tile.dataset.state = "correct";
                 key.classList.add("correct");
-            } else if (targetWord.includes(letter)) {
+            } else if (targetWordCopy.includes(letter)) {
                 tile.dataset.state = "wrong-location";
                 key.classList.add("wrong-location");
+                targetWordCopy = targetWordCopy.replace(letter, "");
             } else {
                 tile.dataset.state = "wrong";
                 key.classList.add("wrong");
@@ -10663,6 +10669,7 @@ function getAllTiles() {
 }
 
 function setGameState() {
+    gameState.length = 0;
     activeTiles = getAllTiles();
 
     for (var i = 0; i < activeTiles.length; i++) {
@@ -10671,7 +10678,6 @@ function setGameState() {
 
     window.localStorage.setItem("gamestate", JSON.stringify(gameState));
     window.localStorage.setItem("day", targetDay);
-    console.log(gameState);
 }
 
 function showAlert(message, duration = 1000) {
